@@ -2,7 +2,7 @@
 ![findo banner](foto/proje.png)
 `findo`, eBPF + Go ile yazilmis minimal runtime anomaly detector'dur.
 Linux'ta `execve`, `openat`, `setuid` olaylarini izler ve supheli davranislari anlik alert olarak verir.
-
+![findo banner](foto/3.png)
 ## Ne tespit eder?
 - `tmp_exec`: `/tmp`, `/dev/shm`, `/var/tmp` altindan calistirma
 - `web_shell`: web surecinden shell spawn
