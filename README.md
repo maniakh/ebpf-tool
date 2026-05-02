@@ -20,7 +20,7 @@ Linux'ta `execve`, `openat`, `setuid` olaylarini izler ve supheli davranislari a
 ```bash
 git clone https://github.com/maniakh/ebpf-tool.git
 cd ebpf-tool
-bash run findo
+bash ./run findo
 ```
 
 ## Calisirken komutlar
