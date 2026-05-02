@@ -454,7 +454,7 @@ func printStats(state *runtimeState) {
 
 func printTableHeader() {
 	fmt.Println(colorWhite + "TIME     RULE         PID   UID   COMM       PARENT     ARG" + colorReset)
-	fmt.Println(colorRed + "-------- ------------ ----- ----- ---------- ---------- --------------------------------" + colorReset)
+	fmt.Println(colorRed + "-------- ------------ ----- ----- ---------- ---------- --------------------------" + colorReset)
 }
 
 func printAlertRow(rule string, v View, msg string) {
