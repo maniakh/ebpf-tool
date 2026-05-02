@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"sort"
 	"strconv"
@@ -281,15 +282,15 @@ func now() string {
 
 func printBanner() {
 	fmt.Println("╔══════════════════════════════════════╗")
-	fmt.Println("║  ______ _ _   _ ____   ___          ║")
-	fmt.Println("║ |  ____| | \\ | |  _ \\ / _ \\         ║")
-	fmt.Println("║ | |__  | |  \\| | | | | | | |        ║")
-	fmt.Println("║ |  __| | | . ` | | | | | | |        ║")
-	fmt.Println("║ | |    | | |\\  | |_| | |_| |        ║")
-	fmt.Println("║ |_|    |_|_| \\_|____/ \\___/         ║")
+	fmt.Printf("║ %-36s ║\n", "______ _ _   _ ____   ___")
+	fmt.Printf("║ %-36s ║\n", "|  ____| | \\ | |  _ \\ / _ \\")
+	fmt.Printf("║ %-36s ║\n", "| |__  | |  \\| | | | | | | |")
+	fmt.Printf("║ %-36s ║\n", "|  __| | | . ` | | | | | | |")
+	fmt.Printf("║ %-36s ║\n", "| |    | | |\\  | |_| | |_| |")
+	fmt.Printf("║ %-36s ║\n", "|_|    |_|_| \\_|____/ \\___/")
 	fmt.Println("╠══════════════════════════════════════╣")
-	fmt.Printf("║  %-36s║\n", toolName+" "+toolVersion)
-	fmt.Printf("║  %-36s║\n", "@"+toolAuthor)
+	fmt.Printf("║ %-36s ║\n", toolName+" "+toolVersion)
+	fmt.Printf("║ %-36s ║\n", "@"+toolAuthor)
 	fmt.Println("╚══════════════════════════════════════╝")
 	fmt.Println()
 }
@@ -330,10 +331,10 @@ func startConsole(stop context.CancelFunc, state *runtimeState, logPath string) 
 				fmt.Printf("%s %s @%s\n", toolName, toolVersion, toolAuthor)
 			case "stats":
 				printStats(state)
-			case "open whitelist":
-				showFile(state.whitelistPath, 200)
-			case "open log":
-				showTail(logPath, 20, 400)
+			case "open whitelist", "-open whitelist":
+				openWithEditor(state.whitelistPath)
+			case "open log", "-open log":
+				openWithPager(logPath)
 			case "exit", "quit":
 				fmt.Println("[*] stopping findo...")
 				stop()
@@ -507,6 +508,32 @@ func showTail(path string, n, maxLines int) {
 	fmt.Printf("[*] last %d lines of %s\n", len(lines), path)
 	for _, ln := range lines {
 		fmt.Println(ln)
+	}
+}
+
+func openWithEditor(path string) {
+	editor := strings.TrimSpace(os.Getenv("EDITOR"))
+	if editor == "" {
+		editor = "nano"
+	}
+	cmd := exec.Command(editor, path)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("[*] editor open failed (%v), fallback to plain output\n", err)
+		showFile(path, 200)
+	}
+}
+
+func openWithPager(path string) {
+	cmd := exec.Command("less", "+G", path)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("[*] pager open failed (%v), fallback to tail output\n", err)
+		showTail(path, 20, 400)
 	}
 }
 
