@@ -23,6 +23,8 @@ cd ebpf-tool
 bash ./run findo
 ```
 
+![findo banner](foto/1.png)
+
 ## Calisirken komutlar
 - `-h` : yardim
 - `-v` : surum
@@ -30,6 +32,8 @@ bash ./run findo
 - `open whitelist` : whitelist dosyasini goster
 - `open log` : log dosyasinin son satirlarini goster
 - `exit` : cikis
+
+![findo banner](foto/2.png)
 
 ## Log ve ayarlar
 - varsayilan log: `findo.log`
