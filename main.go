@@ -31,6 +31,12 @@ const (
 )
 
 const (
+	colorReset = "\033[0m"
+	colorRed   = "\033[31m"
+	colorWhite = "\033[97m"
+)
+
+const (
 	evtExec = 1
 	evtOpen = 2
 	evtSetuid = 3
@@ -281,17 +287,18 @@ func now() string {
 }
 
 func printBanner() {
-	fmt.Println("╔══════════════════════════════════════╗")
-	fmt.Printf("║ %-36s ║\n", "______ _ _   _ ____   ___")
-	fmt.Printf("║ %-36s ║\n", "|  ____| | \\ | |  _ \\ / _ \\")
-	fmt.Printf("║ %-36s ║\n", "| |__  | |  \\| | | | | | | |")
-	fmt.Printf("║ %-36s ║\n", "|  __| | | . ` | | | | | | |")
-	fmt.Printf("║ %-36s ║\n", "| |    | | |\\  | |_| | |_| |")
-	fmt.Printf("║ %-36s ║\n", "|_|    |_|_| \\_|____/ \\___/")
-	fmt.Println("╠══════════════════════════════════════╣")
-	fmt.Printf("║ %-36s ║\n", toolName+" "+toolVersion)
-	fmt.Printf("║ %-36s ║\n", "@"+toolAuthor)
-	fmt.Println("╚══════════════════════════════════════╝")
+	border := colorWhite + "╔══════════════════════════════════════╗" + colorReset
+	fmt.Println(border)
+	fmt.Printf("%s║ %-36s ║%s\n", colorWhite, "______ _ _   _ ____   ___", colorReset)
+	fmt.Printf("%s║ %-36s ║%s\n", colorWhite, "|  ____| | \\ | |  _ \\ / _ \\", colorReset)
+	fmt.Printf("%s║ %-36s ║%s\n", colorWhite, "| |__  | |  \\| | | | | | | |", colorReset)
+	fmt.Printf("%s║ %-36s ║%s\n", colorWhite, "|  __| | | . ` | | | | | | |", colorReset)
+	fmt.Printf("%s║ %-36s ║%s\n", colorWhite, "| |    | | |\\  | |_| | |_| |", colorReset)
+	fmt.Printf("%s║ %-36s ║%s\n", colorWhite, "|_|    |_|_| \\_|____/ \\___/", colorReset)
+	fmt.Println(colorWhite + "╠══════════════════════════════════════╣" + colorReset)
+	fmt.Printf("%s║ %-36s ║%s\n", colorRed, toolName+" "+toolVersion, colorReset)
+	fmt.Printf("%s║ %-36s ║%s\n", colorRed, "@"+toolAuthor, colorReset)
+	fmt.Println(colorWhite + "╚══════════════════════════════════════╝" + colorReset)
 	fmt.Println()
 }
 
@@ -446,20 +453,22 @@ func printStats(state *runtimeState) {
 }
 
 func printTableHeader() {
-	fmt.Println("TIME       RULE          PID   UID   COMM       PARENT     ARG")
-	fmt.Println("---------- ------------ ----- ----- ---------- ---------- ------------------------------")
+	fmt.Println(colorWhite + "TIME     RULE         PID   UID   COMM       PARENT     ARG" + colorReset)
+	fmt.Println(colorRed + "-------- ------------ ----- ----- ---------- ---------- --------------------------------" + colorReset)
 }
 
 func printAlertRow(rule string, v View, msg string) {
 	_ = msg // log file full detay içeriyor, terminal tabloyu kısa tutuyoruz
-	fmt.Printf("%-10s %-12s %-5d %-5d %-10s %-10s %-30s\n",
+	fmt.Printf("%s%-8s %-12s %-5d %-5d %-10s %-10s %-32s%s\n",
+		colorWhite,
 		time.Now().Format("15:04:05"),
 		trim(rule, 12),
 		v.PID,
 		v.UID,
 		trim(v.Comm, 10),
 		trim(v.PComm, 10),
-		trim(v.Arg, 30),
+		trim(nonEmpty(v.Arg), 32),
+		colorReset,
 	)
 }
 
@@ -471,6 +480,13 @@ func trim(s string, n int) string {
 		return s[:n]
 	}
 	return s[:n-1] + "…"
+}
+
+func nonEmpty(s string) string {
+	if strings.TrimSpace(s) == "" {
+		return "-"
+	}
+	return s
 }
 
 func showFile(path string, maxLines int) {
