@@ -66,6 +66,7 @@ type runtimeState struct {
 	totalEvents   uint64
 	totalAlerts   uint64
 	alertsByRule  map[string]uint64
+	tableDirty    bool
 	mu            sync.RWMutex
 }
 
@@ -179,6 +180,9 @@ func main() {
 			}
 			if !shouldEmit(state, fingerprint(rule, v)) {
 				continue
+			}
+			if shouldReprintHeader(state) {
+				printTableHeader()
 			}
 			printAlertRow(rule, v, msg)
 			line := fmt.Sprintf("%s [ALERT %s] pid=%d uid=%d %s parent=%s arg=%s -- %s",
@@ -327,27 +331,37 @@ func printHelp() {
 func startConsole(stop context.CancelFunc, state *runtimeState, logPath string) {
 	go func() {
 		sc := bufio.NewScanner(os.Stdin)
-		for sc.Scan() {
+		for {
+			fmt.Print(">> ")
+			if !sc.Scan() {
+				return
+			}
 			cmd := strings.TrimSpace(sc.Text())
 			switch cmd {
 			case "":
 				continue
 			case "-h", "--help", "help":
 				printHelp()
+				markTableDirty(state)
 			case "-v", "--version", "version":
 				fmt.Printf("%s %s @%s\n", toolName, toolVersion, toolAuthor)
+				markTableDirty(state)
 			case "stats":
 				printStats(state)
+				markTableDirty(state)
 			case "open whitelist", "-open whitelist":
 				openWithEditor(state.whitelistPath)
+				markTableDirty(state)
 			case "open log", "-open log":
 				openWithPager(logPath)
+				markTableDirty(state)
 			case "exit", "quit":
 				fmt.Println("[*] stopping findo...")
 				stop()
 				return
 			default:
 				fmt.Printf("[*] unknown runtime command: %s (type -h)\n", cmd)
+				markTableDirty(state)
 			}
 		}
 	}()
@@ -373,11 +387,12 @@ func buildRuntimeState() *runtimeState {
 
 	return &runtimeState{
 		whitelistPath: wlPath,
-		whitelist:   wl,
-		dedupWindow: time.Duration(dedupSec) * time.Second,
-		lastSeen:    make(map[string]time.Time),
-		startTime:   time.Now(),
+		whitelist:     wl,
+		dedupWindow:   time.Duration(dedupSec) * time.Second,
+		lastSeen:      make(map[string]time.Time),
+		startTime:     time.Now(),
 		alertsByRule: make(map[string]uint64),
+		tableDirty:    false,
 	}
 }
 
@@ -551,6 +566,22 @@ func openWithPager(path string) {
 		fmt.Printf("[*] pager open failed (%v), fallback to tail output\n", err)
 		showTail(path, 20, 400)
 	}
+}
+
+func markTableDirty(state *runtimeState) {
+	state.mu.Lock()
+	state.tableDirty = true
+	state.mu.Unlock()
+}
+
+func shouldReprintHeader(state *runtimeState) bool {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	if state.tableDirty {
+		state.tableDirty = false
+		return true
+	}
+	return false
 }
 
 func fatalf(format string, a ...any) {
