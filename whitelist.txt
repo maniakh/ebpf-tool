@@ -1,0 +1,9 @@
+# findo whitelist
+# Bos satirlar ve # ile baslayan satirlar yok sayilir.
+# Eslesme kurali: rule adi / comm / pcomm / arg icinde gecen substring.
+#
+# Ornekler:
+# credential
+# sudo
+# /usr/bin/apt
+

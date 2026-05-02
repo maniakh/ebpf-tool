@@ -1,0 +1,12 @@
+ebpf-tool
+*.o
+tracer_bpfel*.go
+tracer_bpfel*.o
+tracer_bpfeb*.go
+tracer_bpfeb*.o
+bpf/vmlinux.h
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

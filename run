@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# usage: run findo [args...]
+if [ "${1:-}" != "findo" ]; then
+  echo "usage: run findo [args...]"
+  exit 1
+fi
+shift
+
+exec bash "$(dirname "$0")/tool.sh" "$@"
+
